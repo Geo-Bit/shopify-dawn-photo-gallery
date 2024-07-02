@@ -1,4 +1,4 @@
-# Custom Photo Gallery for Shopify Dawn Theme
+# Shopify Dawn Photo Gallery
 
 ## Introduction
 
