@@ -150,8 +150,6 @@
           });
         }
       });
-
-      scrollToGallery();
     }
 
     function updatePagination() {
@@ -168,9 +166,12 @@
           .addClass(i === currentPage ? 'disabled' : '')
           .click(function() {
             var page = parseInt($(this).text());
-            currentPage = page;
-            displayImages(page);
-            updatePagination();
+            if (page !== currentPage) {
+              currentPage = page;
+              displayImages(page);
+              updatePagination();
+              scrollToGallery();
+            }
           });
 
         pagination.append(button);
