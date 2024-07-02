@@ -29,14 +29,23 @@ Replace the content of the newly created `photo-gallery.liquid` file with `src/p
 4. Under **Template suffix**, select `page.photo-gallery`.
 5. Click **Save**.
 
-### 4. Add Image URLs
+### 4. Add Images
 
-1. Go to **Online Store** > **Themes**.
-2. Click **Customize** on the Dawn theme.
-3. Navigate to the newly created Gallery page.
-4. In the left sidebar, select **Photo Gallery**.
-5. Enter the image URLs, one per line, in the **Image URLs** textarea.
-6. Click **Save**.
+#### Option 1: Using Google Cloud Storage
+
+1. Set **Image Source Type** to **Google Cloud Storage** in the template customizer.
+2. Enter your Google Cloud Storage **Bucket Name** (just name, not the full URL).
+   - Ensure your bucket and files are publicly accessible.
+
+#### Option 2: Using a List of Image Links
+
+1. Set **Image Source Type** to **List of Links**.
+2. Enter the image URLs, one per line, in the **Image URLs** textarea.
+3. Click **Save**.
+
+### Option 3: Manually upload files
+
+Coming soon!
 
 ## Future Enhancements / Work in Progress
 
