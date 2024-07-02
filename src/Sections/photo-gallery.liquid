@@ -3,6 +3,22 @@
   "name": "Photo Gallery",
   "settings": [
     {
+      "type": "select",
+      "id": "source_type",
+      "label": "Image Source Type",
+      "options": [
+        { "value": "google_cloud", "label": "Google Cloud Storage" },
+        { "value": "link_list", "label": "List of Links" }
+      ],
+      "default": "link_list"
+    },
+    {
+      "type": "text",
+      "id": "bucket_name",
+      "label": "Google Cloud Storage Bucket Name",
+      "info": "Enter the name of your Google Cloud Storage bucket"
+    },
+    {
       "type": "textarea",
       "id": "image_urls",
       "label": "Image URLs",
@@ -94,19 +110,22 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
 <script>
   $(document).ready(function() {
     console.log("Document ready");
 
+    var sourceType = `{{ section.settings.source_type }}`;
+    var bucketName = `{{ section.settings.bucket_name }}`;
     var imageUrls = `{{ section.settings.image_urls }}`.trim().split("\n");
-    console.log("Image URLs:", imageUrls);
-
     var photosPerPage = parseInt("{{ section.settings.photos_per_page }}");
-    console.log("Photos per page:", photosPerPage);
-
     var currentPage = 1;
-    var totalPages = Math.ceil(imageUrls.length / photosPerPage);
-    console.log("Total pages:", totalPages);
+
+    async function listImagesFromGoogleCloud() {
+      const url = `https://storage.googleapis.com/storage/v1/b/${bucketName}/o?fields=items%2FmediaLink`;
+      const response = await axios.get(url);
+      return response.data.items.map(item => item.mediaLink);
+    }
 
     function scrollToGallery() {
       $('html, body').animate({
@@ -114,15 +133,22 @@
       }, 500);
     }
 
-    function displayImages(page) {
+    async function displayImages(page) {
       console.log("Displaying images for page:", page);
 
-      var start = (page - 1) * photosPerPage;
-      var end = start + photosPerPage;
-      var gallery = $('#photo-gallery');
+      var imageUrlsToDisplay;
+      if (sourceType === "google_cloud") {
+        imageUrlsToDisplay = await listImagesFromGoogleCloud();
+      } else {
+        imageUrlsToDisplay = imageUrls;
+      }
+
+      const start = (page - 1) * photosPerPage;
+      const end = start + photosPerPage;
+      const gallery = $('#photo-gallery');
       gallery.empty();
 
-      imageUrls.slice(start, end).forEach(function(url) {
+      imageUrlsToDisplay.slice(start, end).forEach(function(url) {
         console.log("Adding image URL:", url.trim());
 
         var galleryItem = `
@@ -150,9 +176,11 @@
           });
         }
       });
+
+      scrollToGallery();
     }
 
-    function updatePagination() {
+    function updatePagination(totalPages) {
       console.log("Updating pagination");
 
       var pagination = $('#pagination');
@@ -169,7 +197,7 @@
             if (page !== currentPage) {
               currentPage = page;
               displayImages(page);
-              updatePagination();
+              updatePagination(totalPages);
               scrollToGallery();
             }
           });
@@ -178,7 +206,17 @@
       }
     }
 
-    displayImages(currentPage);
-    updatePagination();
+    (async function() {
+      var imageUrlsToDisplay;
+      if (sourceType === "google_cloud") {
+        imageUrlsToDisplay = await listImagesFromGoogleCloud();
+      } else {
+        imageUrlsToDisplay = imageUrls;
+      }
+
+      const totalPages = Math.ceil(imageUrlsToDisplay.length / photosPerPage);
+      displayImages(currentPage);
+      updatePagination(totalPages);
+    })();
   });
 </script>
