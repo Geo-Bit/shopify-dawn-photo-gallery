@@ -1,0 +1,183 @@
+{% schema %}
+{
+  "name": "Photo Gallery",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "image_urls",
+      "label": "Image URLs",
+      "info": "Enter each image URL on a new line"
+    },
+    {
+      "type": "number",
+      "id": "photos_per_page",
+      "label": "Photos per Page",
+      "default": 20,
+      "info": "Number of photos to display per page"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Default",
+      "category": "Gallery"
+    }
+  ]
+}
+{% endschema %}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" rel="stylesheet">
+
+<div class="photo-gallery" id="photo-gallery">
+  <!-- Images will be dynamically inserted here -->
+</div>
+
+<div class="pagination" id="pagination">
+  <!-- Pagination controls will be dynamically inserted here -->
+</div>
+
+<style>
+  .photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .gallery-item {
+    flex: 1 1 calc(33.333% - 10px);
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+  }
+  .gallery-item img {
+    width: 100%;
+    height: 300px; /* Adjust height as needed */
+    object-fit: cover;
+  }
+  @media (max-width: 768px) {
+    .gallery-item {
+      flex: 1 1 calc(50% - 10px);
+    }
+  }
+  @media (max-width: 480px) {
+    .gallery-item {
+      flex: 1 1 100%;
+    }
+  }
+  .fancybox-container::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* Set background opacity to 0.3 */
+    backdrop-filter: blur(5px);
+    z-index: -1;
+  }
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  .pagination button {
+    margin: 0 5px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  .pagination button.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+<script>
+  $(document).ready(function() {
+    console.log("Document ready");
+
+    var imageUrls = `{{ section.settings.image_urls }}`.trim().split("\n");
+    console.log("Image URLs:", imageUrls);
+
+    var photosPerPage = parseInt("{{ section.settings.photos_per_page }}");
+    console.log("Photos per page:", photosPerPage);
+
+    var currentPage = 1;
+    var totalPages = Math.ceil(imageUrls.length / photosPerPage);
+    console.log("Total pages:", totalPages);
+
+    function scrollToGallery() {
+      $('html, body').animate({
+        scrollTop: $('#photo-gallery').offset().top
+      }, 500);
+    }
+
+    function displayImages(page) {
+      console.log("Displaying images for page:", page);
+
+      var start = (page - 1) * photosPerPage;
+      var end = start + photosPerPage;
+      var gallery = $('#photo-gallery');
+      gallery.empty();
+
+      imageUrls.slice(start, end).forEach(function(url) {
+        console.log("Adding image URL:", url.trim());
+
+        var galleryItem = `
+          <div class="gallery-item">
+            <a href="${url.trim()}" data-fancybox="gallery">
+              <img src="${url.trim()}" alt="Gallery image">
+            </a>
+          </div>`;
+        gallery.append(galleryItem);
+      });
+
+      $('[data-fancybox="gallery"]').fancybox({
+        buttons: [
+          "zoom",
+          "close"
+        ],
+        mobile: {
+          clickSlide: "close",
+          clickOutside: "close"
+        },
+        afterLoad: function(instance, current) {
+          instance.$refs.container.css({
+            'background': 'rgba(0, 0, 0, 0.3)',
+            'backdrop-filter': 'blur(5px)'
+          });
+        }
+      });
+
+      scrollToGallery();
+    }
+
+    function updatePagination() {
+      console.log("Updating pagination");
+
+      var pagination = $('#pagination');
+      pagination.empty();
+
+      for (var i = 1; i <= totalPages; i++) {
+        console.log("Creating pagination button for page:", i);
+
+        var button = $('<button>')
+          .text(i)
+          .addClass(i === currentPage ? 'disabled' : '')
+          .click(function() {
+            var page = parseInt($(this).text());
+            currentPage = page;
+            displayImages(page);
+            updatePagination();
+          });
+
+        pagination.append(button);
+      }
+    }
+
+    displayImages(currentPage);
+    updatePagination();
+  });
+</script>
