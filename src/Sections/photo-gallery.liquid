@@ -52,60 +52,63 @@
 </div>
 
 <style>
-  .photo-gallery {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  .gallery-item {
-    flex: 1 1 calc(33.333% - 10px);
-    box-sizing: border-box;
-    overflow: hidden;
-    position: relative;
-  }
-  .gallery-item img {
-    width: 100%;
-    height: 300px; /* Adjust height as needed */
-    object-fit: cover;
-  }
-  @media (max-width: 768px) {
-    .gallery-item {
-      flex: 1 1 calc(50% - 10px);
+    .photo-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
     }
-  }
-  @media (max-width: 480px) {
     .gallery-item {
-      flex: 1 1 100%;
+      flex: 1 1 calc(33.333% - 10px);
+      box-sizing: border-box;
+      overflow: hidden;
+      position: relative;
     }
+    .gallery-item img {
+      width: 100%;
+      height: 300px; /* Adjust height as needed */
+      object-fit: cover;
+    }
+    @media (max-width: 768px) {
+      .gallery-item {
+        flex: 1 1 calc(50% - 10px);
+      }
+    }
+    @media (max-width: 480px) {
+      .gallery-item {
+        flex: 1 1 100%;
+      }
+    }
+    body {
+    line-height: 1;
   }
-  .fancybox-container::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.3); /* Set background opacity to 0.3 */
-    backdrop-filter: blur(5px);
-    z-index: -1;
-  }
-  .pagination {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  .pagination button {
-    margin: 0 5px;
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  .pagination button.disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
+    .fancybox-container::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3); /* Set background opacity to 0.3 */
+      backdrop-filter: blur(5px);
+      z-index: -1;
+    }
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .pagination button {
+      margin: 0 5px;
+      padding: 10px 15px;
+      background-color: #000000;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    .pagination button.disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -177,7 +180,6 @@
         }
       });
 
-      scrollToGallery();
     }
 
     function updatePagination(totalPages) {
