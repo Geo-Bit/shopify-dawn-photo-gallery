@@ -19,6 +19,12 @@
       "info": "Enter the name of your Google Cloud Storage bucket"
     },
     {
+      "type": "text",
+      "id": "json_file_url",
+      "label": "Custom JSON File URL",
+      "info": "Provide the URL to the JSON file for custom sorting (optional)"
+    },
+    {
       "type": "textarea",
       "id": "image_urls",
       "label": "Image URLs",
@@ -120,6 +126,7 @@
 
     var sourceType = `{{ section.settings.source_type }}`;
     var bucketName = `{{ section.settings.bucket_name }}`;
+    var jsonFileUrl = `{{ section.settings.json_file_url }}`;
     var imageUrls = `{{ section.settings.image_urls }}`.trim().split("\n");
     var photosPerPage = parseInt("{{ section.settings.photos_per_page }}");
     var currentPage = 1;
@@ -130,10 +137,9 @@
       return response.data.items.map(item => item.mediaLink);
     }
 
-    function scrollToGallery() {
-      $('html, body').animate({
-        scrollTop: $('#photo-gallery').offset().top
-      }, 500);
+    async function fetchImageOrder() {
+      const response = await axios.get(jsonFileUrl);
+      return response.data.imageOrder;
     }
 
     async function displayImages(page) {
@@ -141,7 +147,11 @@
 
       var imageUrlsToDisplay;
       if (sourceType === "google_cloud") {
-        imageUrlsToDisplay = await listImagesFromGoogleCloud();
+        if (jsonFileUrl) {
+          imageUrlsToDisplay = await fetchImageOrder();
+        } else {
+          imageUrlsToDisplay = await listImagesFromGoogleCloud();
+        }
       } else {
         imageUrlsToDisplay = imageUrls;
       }
@@ -179,7 +189,12 @@
           });
         }
       });
+    }
 
+    function scrollToGallery() {
+      $('html, body').animate({
+        scrollTop: $('#photo-gallery').offset().top
+      }, 500);
     }
 
     function updatePagination(totalPages) {
@@ -211,7 +226,11 @@
     (async function() {
       var imageUrlsToDisplay;
       if (sourceType === "google_cloud") {
-        imageUrlsToDisplay = await listImagesFromGoogleCloud();
+        if (jsonFileUrl) {
+          imageUrlsToDisplay = await fetchImageOrder();
+        } else {
+          imageUrlsToDisplay = await listImagesFromGoogleCloud();
+        }
       } else {
         imageUrlsToDisplay = imageUrls;
       }
